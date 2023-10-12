@@ -14,7 +14,8 @@ export const fetchUsers = createAsyncThunk('users/fetch', async() =>{
   return response.data;
 });
 
-export const addUserThunk = createAsyncThunk('users/add', async() =>{
+export const addUserThunk = createAsyncThunk('users/add', async(body) =>{
+  console.log({body});
   const response = await axios.post(USERS_API, {name: faker.name.fullName()});
   await pause(1000)
   return response.data;

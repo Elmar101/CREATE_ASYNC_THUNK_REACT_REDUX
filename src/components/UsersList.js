@@ -1,47 +1,24 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { useThunk } from "../hooks/useThunk";
 import { addUserThunk, fetchUsers } from "../store";
 import Skeleton from "./Skeleton";
 
 function UsersList() {
-  const dispatch = useDispatch();
-  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
-  const [loadingUsersError, setLoadingUsersError] = useState(null);
+  const [runThunk, isLoading, error] = useThunk(fetchUsers);
+  const [createUserThunk, isCreatingUser, creatingUserError] = useThunk(addUserThunk);
 
-  const [isCreatingUser, setIsCreatingUser] = useState(false);
-  const [CreatingUserError, setCreatingUserError] = useState(null);
-  const { isLoading, data, error } = useSelector((state) => state.users);
+  const { data } = useSelector((state) => state.users);
 
   useEffect(() => {
-    setIsLoadingUsers(true);
-    console.log(dispatch(fetchUsers()));
-    dispatch(fetchUsers())
-      .unwrap()
-      .then((res) => {
-        console.log({ res });
-      })
-      .catch((error) => {
-        setLoadingUsersError(error);
-        setIsLoadingUsers(false);
-      })
-      .finally(() => {
-        setIsLoadingUsers(false);
-      });
-  }, [dispatch]);
+    runThunk();
+  }, [runThunk]);
 
   const handleAddUser = () => {
-    setIsCreatingUser(true);
-    dispatch(addUserThunk())
-      .unwrap()
-      .catch((err) => setCreatingUserError(err))
-      .finally(() => setIsCreatingUser(false));
+   createUserThunk();
   };
 
-  // if(isLoading ) return <Skeleton times={6} className='h-10 w-full'/>;
-  if (isLoadingUsers) return <Skeleton times={6} className="h-10 w-full" />;
-
-  // if(error) return <div> Errors </div>;
-  if (loadingUsersError) return <div> Errors </div>;
+  if (isLoading) return <Skeleton times={6} className="h-10 w-full" />;
 
   return (
     <>
@@ -61,7 +38,7 @@ function UsersList() {
               Add user
             </button>
           )}
-          {CreatingUserError && <h1>{JSON.stringify(CreatingUserError)}</h1>}
+          {error && <h1>{JSON.stringify(creatingUserError)}</h1>}
         </div>
       </div>
       <br />
